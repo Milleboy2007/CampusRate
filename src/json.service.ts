@@ -8,6 +8,8 @@ export class JsonService implements OnModuleInit{
 
     constructor(private configService: ConfigService){
         this.filePath = this.configService.get<string>('DATA_FILE_PATH')!;
+
+        if(!this.filePath.endsWith('.json')) throw new Error(`Configuration invalide: DATA_FILE_PATH doit se terminer par '.json'. Chemin reçu : ${this.filePath}`)
     }
 
     async onModuleInit() {
