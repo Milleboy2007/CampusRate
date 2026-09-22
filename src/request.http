@@ -1,0 +1,10 @@
+### asdwa
+POST http://localhost:3000/api/v1/places
+Content-Type: application/json
+
+{
+    "name": "test",
+    "description": "test2",
+    "category": "STUDY_SPACE",
+    "address": "Test rue du test, Montreal"  
+}

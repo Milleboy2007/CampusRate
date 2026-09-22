@@ -1,0 +1,15 @@
+export enum CATEGORY {
+    STUDY_SPACE,
+    LIBRARY,
+    FOOD_SERVICE,
+    SPORTS,
+    STUDENT_SERVICE,
+    COMPUTER_LAB,
+    OTHER
+}
+
+export enum STATE{
+    ACTIVE,
+    TEMPORARILY_CLOSED,
+    INACTIVE
+}
