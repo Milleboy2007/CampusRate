@@ -91,7 +91,7 @@ Exemple de réponse :
 
 <!-- Signaler une limite, une dépendance, une décision ou un travail restant. -->
 
-- <Point aucun d'attention ou>
+- <Point d'attention ou aucun>
 
 ## Liste de contrôle avant fusion
 

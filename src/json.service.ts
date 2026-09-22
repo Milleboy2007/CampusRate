@@ -25,7 +25,7 @@ export class JsonService implements OnModuleInit{
         try{
             const fileContent = await readFile(this.filePath, 'utf-8');
             JSON.parse(fileContent);
-        } catch (error) {
+        } catch {
             throw new Error(`Le fichier JSON à ${this.filePath} est corrompu ou invalide.`)
         }
     }
@@ -34,7 +34,7 @@ export class JsonService implements OnModuleInit{
         try{
             const fileContent = await readFile(this.filePath, 'utf-8');
             return JSON.parse(fileContent);
-        }catch (error){
+        }catch {
             throw new InternalServerErrorException('Impossible de lire les données JSON.')
         }
     }
@@ -43,7 +43,7 @@ export class JsonService implements OnModuleInit{
         try{
             const jsonString = JSON.stringify(data, null, 2);
             await writeFile(this.filePath, jsonString, 'utf-8');
-        }catch (error){
+        }catch {
             throw new InternalServerErrorException('Impossible de sauvegarder les données JSON.');
         }
     }
