@@ -16,13 +16,16 @@ GET http://localhost:3000/api/v1/places
 Get http://localhost:3000/api/v1/places/d18d1101-8ea2-4e8fa362-c678569024a5
 
 ### Update une place
-PATCH  http://localhost:3000/api/v1/places/update/c3a50bdb-43e8-4a1c-8d64-65226be86535
+PATCH  http://localhost:3000/api/v1/places/update/32fff225-18aa-474c-b136-4ddce1ccbd9f
 Content-Type: application/json
 
 {
-    "name": "UpdateTest",
-    "description": "UpdateTest",
+    "name": "DeleteTest",
+    "description": "DeleteTest",
     "category": "STUDY_SPACE",
     "address": "Test rue du test, Montreal",
     "status": "ACTIVE"
 }
+
+### Delete a place
+DELETE http://localhost:3000/api/v1/places/delete/32fff225-18aa-474c-b136-4ddce1ccbd9f

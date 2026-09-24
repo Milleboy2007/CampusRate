@@ -60,7 +60,12 @@ export class PlacesService {
     return updatedPlace;
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} place`;
+  async remove(id: string) {
+    const places = await this.findAll();
+    const deleteAt = places.findIndex(place => place.id == id);
+
+    places.splice(deleteAt, 1);
+
+    return await this.jsonService.updateDB("places", places);
   }
 }
