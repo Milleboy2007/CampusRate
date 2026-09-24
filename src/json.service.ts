@@ -18,7 +18,7 @@ export class JsonService implements OnModuleInit{
         } catch (error) {
             if ((error as any).code === 'ENOENT'){
                 console.log(`Fichier introuvable à ${this.filePath}. Création automatique...`);
-                await writeFile(this.filePath, JSON.stringify([]), 'utf-8')
+                await writeFile(this.filePath, JSON.stringify({}), 'utf-8')
             } else throw error;
         }
 
@@ -39,12 +39,22 @@ export class JsonService implements OnModuleInit{
         }
     }
 
-    async write<T>(data: T): Promise<void>{
+    private async write<T>(data: T): Promise<void>{
         try{
             const jsonString = JSON.stringify(data, null, 2);
             await writeFile(this.filePath, jsonString, 'utf-8');
         }catch {
             throw new InternalServerErrorException('Impossible de sauvegarder les données JSON.');
         }
+    }
+
+    async addToDb<T>(data: T, type: string): Promise<void>{
+        const db = await this.readAll<Record<string, T[]>>();
+
+        if(!db[type]) db[type] = [];
+
+        db[type].push(data);
+
+        await this.write(db);
     }
 }
