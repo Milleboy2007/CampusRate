@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreatePlaceDto } from './dto/create-place.dto';
 import { UpdatePlaceDto } from './dto/update-place.dto';
 import { JsonService } from '../json.service';
@@ -30,19 +30,34 @@ export class PlacesService {
   }
 
   async findAll(): Promise<Place[]> {
-    return await this.jsonService.readOne("places");
+    return await this.jsonService.readOneTab("places");
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<Place> {
     const toFind = (await this.findAll()).find(place => place.id == id);
 
     if(toFind){
       return toFind;
-    }else return "[Error 404 Not Found]: No place found, is the id good?"
+    }else throw new NotFoundException(`No place found, is the id good? Id given: ${id}`)
   }
 
-  update(id: string, updatePlaceDto: UpdatePlaceDto) {
-    return `This action updates a #${id} place`;
+  async update(id: string, updatePlaceDto: UpdatePlaceDto): Promise<Place> {
+    const places = await this.findAll();
+    const isAt = places.findIndex(place => place.id == id);
+
+    if(isAt == -1) throw new NotFoundException(`No place found, is the id good? Id given: ${id}`);
+    
+
+    const updatedPlace: Place = {
+      ...places[isAt],
+      ...updatePlaceDto,
+      updatedAt: new Date()
+    }
+    places[isAt] = updatedPlace;
+
+    await this.jsonService.updateDB("places", places);
+
+    return updatedPlace;
   }
 
   remove(id: string) {

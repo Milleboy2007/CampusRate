@@ -58,8 +58,14 @@ export class JsonService implements OnModuleInit{
         await this.write(db);
     }
 
-    async readOne<T>(type: string): Promise<T[]>{
+    async readOneTab<T>(type: string): Promise<T[]>{
         const db = await this.readAll<Record<string, T[]>>();
         return db[type] || [];
+    }
+
+    async updateDB<T>(type: string, newData: T[]): Promise<void>{
+        const db = await this.readAll<Record<string, T[]>>();
+        db[type] = newData;
+        await this.write(db);
     }
 }
