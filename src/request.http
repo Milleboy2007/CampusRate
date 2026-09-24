@@ -1,10 +1,16 @@
-### asdwa
+### Creer une place
 POST http://localhost:3000/api/v1/places
 Content-Type: application/json
 
 {
-    "name": "test",
+    "name": "u",
     "description": "test2",
     "category": "STUDY_SPACE",
     "address": "Test rue du test, Montreal"  
 }
+
+### Get tout les place
+GET http://localhost:3000/api/v1/places
+
+### Get by id
+Get http://localhost:3000/api/v1/places/d18d1101-8ea2-4e8fa362-c678569024a5

@@ -29,19 +29,23 @@ export class PlacesService {
     return newPlace;
   }
 
-  findAll() {
-    return `This action returns all places`;
+  async findAll(): Promise<Place[]> {
+    return await this.jsonService.readOne("places");
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} place`;
+  async findOne(id: string) {
+    const toFind = (await this.findAll()).find(place => place.id == id);
+
+    if(toFind){
+      return toFind;
+    }else return "[Error 404 Not Found]: No place found, is the id good?"
   }
 
-  update(id: number, updatePlaceDto: UpdatePlaceDto) {
+  update(id: string, updatePlaceDto: UpdatePlaceDto) {
     return `This action updates a #${id} place`;
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return `This action removes a #${id} place`;
   }
 }
