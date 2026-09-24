@@ -9,7 +9,7 @@ export class Place {
     address: string;
     services: string[] = [];
     status: STATE;
-    averageRating: number;
+    averageRating: number | null;
     reviewCount: number;
     createAt: Date;
     updatedAt: Date;

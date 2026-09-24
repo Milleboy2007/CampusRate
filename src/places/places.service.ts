@@ -19,7 +19,7 @@ export class PlacesService {
       services: createPlaceDto.services || [],
       status: createPlaceDto.status || STATE.ACTIVE,
       ...createPlaceDto,
-      averageRating: 0,
+      averageRating: null,
       reviewCount: 0,
       createAt: new Date(),
       updatedAt: new Date(),
