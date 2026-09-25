@@ -1,0 +1,498 @@
+{
+  "info": {
+    "_postman_id": "4d66b83d-957a-46dd-8e12-21885cd55a08",
+    "name": "CampusRate API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "50732053"
+  },
+  "item": [
+    {
+      "name": "Places",
+      "item": [
+        {
+          "name": "[Succes] Creer un endroit",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Statut 201 Created\", () => pm.response.to.have.status(201));\r",
+                  "pm.test(\"En-tête Location présent\", () => pm.response.to.have.header(\"Location\"));\r",
+                  "// On sauvegarde l'ID pour les requêtes suivantes\r",
+                  "if (pm.response.code === 201) {\r",
+                  "    pm.collectionVariables.set(\"placeId\", pm.response.json().id);\r",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"Café Étudiant\",\r\n  \"description\": \"Espace animé avec machines à café.\",\r\n  \"category\": \"FOOD_SERVICE\",\r\n  \"address\": \"Pavillon C, 1er étage\",\r\n  \"services\": [\"WIFI\", \"FOOD\"]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/places",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "places"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[Succes] Lister et filtrer (Pagination)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Statut 200 OK\", () => pm.response.to.have.status(200));\r",
+                  "pm.test(\"La structure de pagination est présente\", () => {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.expect(jsonData).to.have.property('data');\r",
+                  "    pm.expect(jsonData).to.have.property('pagination');\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/places?category=FOOD_SERVICE&page=1&limit=5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "places"
+              ],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "FOOD_SERVICE"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "5"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Reviews",
+      "item": [
+        {
+          "name": "[Succes] Publier une appreciation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Statut 201 Created\", () => pm.response.to.have.status(201));\r",
+                  "if (pm.response.code === 201) {\r",
+                  "    pm.collectionVariables.set(\"reviewId\", pm.response.json().id);\r",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"authorName\": \"Nitro\",\r\n  \"rating\": 4,\r\n  \"comment\": \"Très bon café mais un peu bruyant le midi.\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/places/{{placeId}}/reviews",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "places",
+                "{{placeId}}",
+                "reviews"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[Validation] Verifier le recalcul de la moyenne",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Le recalcul a fonctionné (averageRating = 4, reviewCount = 1)\", () => {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.expect(jsonData.averageRating).to.eql(4);\r",
+                  "    pm.expect(jsonData.reviewCount).to.eql(1);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/places/{{placeId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "places",
+                "{{placeId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[Succes] Modifier une appreciation",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Statut 200 OK\", () => pm.response.to.have.status(200));\r",
+                  "pm.test(\"La note a été mise à jour\", () => pm.expect(pm.response.json().rating).to.eql(5));"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"rating\": 5,\r\n  \"comment\": \"Finalement, le café est tellement bon que je mets 5 étoiles.\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/reviews/{{reviewId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reviews",
+                "{{reviewId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Format Problem Details & Erreur",
+      "item": [
+        {
+          "name": "[Erreur 400] Validaton DTO (Categorie invalide)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Statut 400 Bad Request\", () => pm.response.to.have.status(400));\r",
+                  "pm.test(\"Format Problem Details respecté\", () => {\r",
+                  "    const jsonData = pm.response.json();\r",
+                  "    pm.expect(jsonData.type).to.eql(\"about:blank\");\r",
+                  "    pm.expect(jsonData.status).to.eql(400);\r",
+                  "    pm.expect(jsonData).to.have.property('detail');\r",
+                  "    pm.expect(jsonData).to.have.property('instance');\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"Local secret\",\r\n  \"description\": \"...\",\r\n  \"category\": \"CATEGORIE_QUI_N_EXISTE_PAS\",\r\n  \"address\": \"Sous-sol\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/places",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "places"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[Erreur 404] Ressource inexistante",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Statut 404 Not Found\", () => pm.response.to.have.status(404));\r",
+                  "pm.test(\"Format Problem Details respecté\", () => {\r",
+                  "    pm.expect(pm.response.json().type).to.eql(\"about:blank\");\r",
+                  "    pm.expect(pm.response.json().status).to.eql(404);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/places/plc_faux_id_123",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "places",
+                "plc_faux_id_123"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[Erreur 400] Tentative de suppression bloquée (Conflit)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Statut 400 Bad Request - Bloqué par les appréciations\", () => pm.response.to.have.status(400));\r",
+                  "pm.test(\"Le détail mentionne les appréciations\", () => {\r",
+                  "    pm.expect(pm.response.json().detail).to.include(\"reviews before the place\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/places/{{placeId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "places",
+                "{{placeId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Nettoyage (Validation du code 204)",
+      "item": [
+        {
+          "name": "[Succès] Supprimer l'appréciation",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Statut 204 No Content\", () => pm.response.to.have.status(204));\r",
+                  "pm.test(\"Corps de réponse vide\", () => pm.expect(pm.response.text()).to.be.empty);"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reviews/{{reviewId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reviews",
+                "{{reviewId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[Succès] Supprimer l'endroit (Maintenant que l'appréciation est partie)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Statut 204 No Content - Suppression réussie\", () => pm.response.to.have.status(204));"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/places/{{placeId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "places",
+                "{{placeId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "placeId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "reviewId",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
