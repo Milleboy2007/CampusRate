@@ -6,7 +6,6 @@ import { randomUUID } from 'node:crypto';
 import { STATE } from './enum/place-enum';
 import { Place } from './entities/place.entity';
 import { FiltrePagePlaceDto } from './dto/filtre-page-place.dto';
-import { ReviewsService } from '../reviews/reviews.service';
 
 @Injectable()
 export class PlacesService {
