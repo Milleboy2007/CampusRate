@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { VersioningType } from '@nestjs/common';
 import { ValidationPipe } from '@nestjs/common';
 import { ProblemDetailsFilter } from './common/filters/problem-details.filter';
+import { configureSwagger } from './configure-swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -23,6 +24,8 @@ async function bootstrap() {
   );
 
   app.useGlobalFilters(new ProblemDetailsFilter())
+
+  configureSwagger(app);
 
   await app.listen(process.env.PORT ?? 3000);
 }
