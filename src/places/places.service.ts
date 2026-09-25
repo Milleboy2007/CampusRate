@@ -6,6 +6,7 @@ import { randomUUID } from 'node:crypto';
 import { STATE } from './enum/place-enum';
 import { Place } from './entities/place.entity';
 import { FiltrePagePlaceDto } from './dto/filtre-page-place.dto';
+import { ReviewsService } from '../reviews/reviews.service';
 
 @Injectable()
 export class PlacesService {
@@ -87,6 +88,11 @@ export class PlacesService {
   async remove(id: string) {
     const places = await this.jsonService.readOneTab<Place>("places");
     const place = await this.findOne(id);
+
+    const reviews = (await this.jsonService.readOneTab<any>('reviews')).filter(rev => rev.placeId == place.id);
+
+    if(reviews.length > 0) throw new BadRequestException(`This place have reviews! Delete reviews before the place. Amount of reviews: ${reviews.length}`);
+
     const deleteAt = places.findIndex(p => p.id == place.id);
 
     places.splice(deleteAt, 1);

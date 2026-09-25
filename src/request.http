@@ -31,7 +31,7 @@ Content-Type: application/json
 }
 
 ### Delete a place
-DELETE http://localhost:3000/api/v1/places/delete/32fff225-18aa-474c-b136-4ddce1ccbd9f
+DELETE http://localhost:3000/api/v1/places/delete/plc_6a3f1c70-35ef-4d07-b5a5-ce5a40ed3969
 
 ### ---------------------------------------------------------------------------------------
 
