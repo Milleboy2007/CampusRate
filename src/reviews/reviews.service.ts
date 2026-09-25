@@ -64,11 +64,26 @@ export class ReviewsService {
 
     if(toFind){
       return toFind;
-    }else throw new NotFoundException(`No review found, is the id good? Id given: ${id}`)
+    }else throw new NotFoundException(`No review found, is the id good? Id given: ${id}`);
   }
 
-  update(id: string, updateReviewDto: UpdateReviewDto) {
-    return `This action updates a #${id} review`;
+  async update(id: string, updateReviewDto: UpdateReviewDto) {
+    const reviews = await this.findAll();
+    const isAt = reviews.findIndex(rev => rev.id == id);
+
+    if(isAt == -1) throw new NotFoundException(`No review found, is the id good? Id given: ${id}`);
+
+    const updatedReview: Review = {
+      ...reviews[isAt],
+      ...updateReviewDto,
+      updatedAt: new Date()
+    }
+
+    reviews[isAt] = updatedReview;
+
+    await this.jsonService.updateDB('reviews', reviews);
+
+    return updatedReview;
   }
 
   remove(id: string) {

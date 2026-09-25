@@ -30,12 +30,14 @@ export class ReviewsController {
     return this.reviewService.findOne(id);
   }
 
-  @Patch('reviews/:id')
-  update(@Param('id') id: string, @Body() updateReviewDto: UpdateReviewDto) {
-    return this.reviewService.update(id, updateReviewDto);
+  @Patch('reviews/update/:id')
+  async update(@Param('id') id: string, @Body() updateReviewDto: UpdateReviewDto, @Res({passthrough: true}) res: Response) {
+    const updatedReview = await this.reviewService.update(id, updateReviewDto);
+    res.setHeader('Location', `api/v1/reviews/${updatedReview.id}`);
+    return updatedReview;
   }
 
-  @Delete('reviews/:id')
+  @Delete('reviews/delete/:id')
   remove(@Param('id') id: string) {
     return this.reviewService.remove(id);
   }

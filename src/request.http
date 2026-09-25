@@ -53,3 +53,11 @@ GET http://localhost:3000/api/v1/reviews/rev_ae43202e-a4f7-42dc-afd8-9dd44360ba5
 
 ### Trouver tout les review pour une place
 GET http://localhost:3000/api/v1/places/plc_6a3f1c70-35ef-4d07-b5a5-ce5a40ed3969/reviews
+
+### Update une review
+PATCH  http://localhost:3000/api/v1/reviews/update/rev_364a492d-d8d5-44c5-80e0-55046e0e853b
+Content-Type: application/json
+
+{
+    "comment": "UPDATED TEST"
+}
