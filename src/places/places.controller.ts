@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Res } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Res, Query } from '@nestjs/common';
 import { PlacesService } from './places.service';
 import { CreatePlaceDto } from './dto/create-place.dto';
 import { UpdatePlaceDto } from './dto/update-place.dto';
 import type { Response } from 'express';
+import { FiltrePagePlaceDto } from './dto/filtre-page-place.dto';
 
 @Controller('places')
 export class PlacesController {
@@ -16,8 +17,8 @@ export class PlacesController {
   }
 
   @Get()
-  async findAll() {
-    return await this.placesService.findAll();
+  async findAll(@Query() filterPageDto: FiltrePagePlaceDto) {
+    return await this.placesService.findAll(filterPageDto);
   }
 
   @Get(':id')
