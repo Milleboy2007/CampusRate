@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
 import { JsonService } from '../json.service';
@@ -49,8 +49,8 @@ export class ReviewsService {
     return newReview;
   }
 
-  findAll() {
-    return `This action returns all review`;
+  async findAll(): Promise<Review[]> {
+    return await this.jsonService.readOneTab<Review>('reviews');
   }
 
   async findAllFor(placeId: string){
@@ -59,8 +59,12 @@ export class ReviewsService {
     return reviews.filter(rev => rev.placeId == place.id);
   }
 
-  findOne(id: string) {
-    return `This action returns a #${id} review`;
+  async findOne(id: string): Promise<Review> {
+    const toFind = (await this.findAll()).find(rev => rev.id == id);
+
+    if(toFind){
+      return toFind;
+    }else throw new NotFoundException(`No review found, is the id good? Id given: ${id}`)
   }
 
   update(id: string, updateReviewDto: UpdateReviewDto) {
