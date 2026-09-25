@@ -55,9 +55,12 @@ GET http://localhost:3000/api/v1/reviews/rev_ae43202e-a4f7-42dc-afd8-9dd44360ba5
 GET http://localhost:3000/api/v1/places/plc_6a3f1c70-35ef-4d07-b5a5-ce5a40ed3969/reviews
 
 ### Update une review
-PATCH  http://localhost:3000/api/v1/reviews/update/rev_364a492d-d8d5-44c5-80e0-55046e0e853b
+PATCH  http://localhost:3000/api/v1/reviews/update/rev_ae43202e-a4f7-42dc-afd8-9dd44360ba58
 Content-Type: application/json
 
 {
-    "comment": "UPDATED TEST"
+    "comment": "DELETE TEST"
 }
+
+### Delete a review
+DELETE http://localhost:3000/api/v1/reviews/delete/rev_a90eb434-f76d-4fca-b37f-0b6450e91ef1

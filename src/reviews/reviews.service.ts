@@ -83,10 +83,20 @@ export class ReviewsService {
 
     await this.jsonService.updateDB('reviews', reviews);
 
+    await this.updatePlaceStats(await this.placesService.findOne(reviews[isAt].placeId))
+
     return updatedReview;
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} review`;
+  async remove(id: string) {
+    const reviews = await this.findAll();
+    const review = await this.findOne(id);
+    const deleteAt = reviews.findIndex(rev => rev.id == review.id);
+    const placeId = reviews[deleteAt].placeId;
+
+    reviews.splice(deleteAt, 1);
+
+    await this.jsonService.updateDB("reviews", reviews);
+    await this.updatePlaceStats(await this.placesService.findOne(placeId));
   }
 }

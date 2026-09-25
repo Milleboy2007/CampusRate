@@ -86,7 +86,8 @@ export class PlacesService {
 
   async remove(id: string) {
     const places = await this.jsonService.readOneTab<Place>("places");
-    const deleteAt = places.findIndex(place => place.id == id);
+    const place = await this.findOne(id);
+    const deleteAt = places.findIndex(p => p.id == place.id);
 
     places.splice(deleteAt, 1);
 
