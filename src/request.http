@@ -10,13 +10,16 @@ Content-Type: application/json
 }
 
 ### Get tout les place
+GET http://localhost:3000/api/v1/places
+
+### Get tout les place avec filtre et pagination
 GET http://localhost:3000/api/v1/places?page=1&category=COMPUTER_LAB&limit=10
 
 ### Get by id
 Get http://localhost:3000/api/v1/places/0aaf3cbd-f582-41c1-803e-6e66e76f3694
 
 ### Update une place
-PATCH  http://localhost:3000/api/v1/places/update/32fff225-18aa-474c-b136-4ddce1ccbd9f
+PATCH  http://localhost:3000/api/v1/places/update/8b42408a-ba9d-4e1e-86c5-191bd1e211df
 Content-Type: application/json
 
 {
@@ -29,3 +32,18 @@ Content-Type: application/json
 
 ### Delete a place
 DELETE http://localhost:3000/api/v1/places/delete/32fff225-18aa-474c-b136-4ddce1ccbd9f
+
+### ---------------------------------------------------------------------------------------
+
+### Create review
+POST  http://localhost:3000/api/v1/places/plc_6a3f1c70-35ef-4d07-b5a5-ce5a40ed3969/reviews
+Content-Type: application/json
+
+{
+    "authorName": "Test",
+    "rating": 5,
+    "comment": "Test"
+}
+
+### Trouver tout les review pour une place
+GET http://localhost:3000/api/v1/places/plc_6a3f1c70-35ef-4d07-b5a5-ce5a40ed3969/reviews

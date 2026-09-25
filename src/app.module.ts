@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import { validate } from './env.validation';
 import { PlacesModule } from './places/places.module';
 import { JsonService } from './json.service';
+import { ReviewsModule } from './reviews/reviews.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { JsonService } from './json.service';
       isGlobal: true
     }),
     PlacesModule,
+    ReviewsModule,
   ],
   controllers: [AppController],
   providers: [AppService, JsonService],

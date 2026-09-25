@@ -16,13 +16,13 @@ export class PlacesService {
 
   async create(createPlaceDto: CreatePlaceDto) {
     const newPlace: Place = {
-      id: randomUUID(),
+      id: `plc_${randomUUID()}`,
       services: createPlaceDto.services || [],
       status: createPlaceDto.status || STATE.ACTIVE,
       ...createPlaceDto,
       averageRating: null,
       reviewCount: 0,
-      createAt: new Date(),
+      createdAt: new Date(),
       updatedAt: new Date(),
     }
 
