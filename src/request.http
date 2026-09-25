@@ -3,14 +3,14 @@ POST http://localhost:3000/api/v1/places
 Content-Type: application/json
 
 {
-    "name": "u",
-    "description": "test2",
-    "category": "OTHER",
+    "name": "Test",
+    "description": "Test",
+    "category": "LIBRARY",
     "address": "Test rue du test, Montreal"  
 }
 
 ### Get tout les place
-GET http://localhost:3000/api/v1/places
+GET http://localhost:3000/api/v1/places?page=1&category=COMPUTER_LAB&limit=10
 
 ### Get by id
 Get http://localhost:3000/api/v1/places/0aaf3cbd-f582-41c1-803e-6e66e76f3694
