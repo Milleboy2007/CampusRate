@@ -11,6 +11,6 @@ export class Place {
     status: STATE;
     averageRating: number | null;
     reviewCount: number;
-    createAt: Date;
+    createdAt: Date;
     updatedAt: Date;
 }

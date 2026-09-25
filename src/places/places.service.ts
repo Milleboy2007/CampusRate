@@ -16,13 +16,13 @@ export class PlacesService {
 
   async create(createPlaceDto: CreatePlaceDto) {
     const newPlace: Place = {
-      id: randomUUID(),
+      id: `plc_${randomUUID()}`,
       services: createPlaceDto.services || [],
       status: createPlaceDto.status || STATE.ACTIVE,
       ...createPlaceDto,
       averageRating: null,
       reviewCount: 0,
-      createAt: new Date(),
+      createdAt: new Date(),
       updatedAt: new Date(),
     }
 
@@ -86,7 +86,13 @@ export class PlacesService {
 
   async remove(id: string) {
     const places = await this.jsonService.readOneTab<Place>("places");
-    const deleteAt = places.findIndex(place => place.id == id);
+    const place = await this.findOne(id);
+
+    const reviews = (await this.jsonService.readOneTab<any>('reviews')).filter(rev => rev.placeId == place.id);
+
+    if(reviews.length > 0) throw new BadRequestException(`This place have reviews! Delete reviews before the place. Amount of reviews: ${reviews.length}`);
+
+    const deleteAt = places.findIndex(p => p.id == place.id);
 
     places.splice(deleteAt, 1);
 
