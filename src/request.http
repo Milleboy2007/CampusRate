@@ -19,7 +19,7 @@ GET http://localhost:3000/api/v1/places?page=1&category=COMPUTER_LAB&limit=10
 Get http://localhost:3000/api/v1/places/0aaf3cbd-f582-41c1-803e-6e66e76f3694
 
 ### Update une place
-PATCH  http://localhost:3000/api/v1/places/update/8b42408a-ba9d-4e1e-86c5-191bd1e211df
+PATCH  http://localhost:3000/api/v1/places/8b42408a-ba9d-4e1e-86c5-191bd1e211df
 Content-Type: application/json
 
 {
@@ -31,7 +31,7 @@ Content-Type: application/json
 }
 
 ### Delete a place
-DELETE http://localhost:3000/api/v1/places/delete/plc_6a3f1c70-35ef-4d07-b5a5-ce5a40ed3969
+DELETE http://localhost:3000/api/v1/places/plc_6a3f1c70-35ef-4d07-b5a5-ce5a40ed3969
 
 ### ---------------------------------------------------------------------------------------
 
@@ -55,7 +55,7 @@ GET http://localhost:3000/api/v1/reviews/rev_ae43202e-a4f7-42dc-afd8-9dd44360ba5
 GET http://localhost:3000/api/v1/places/plc_6a3f1c70-35ef-4d07-b5a5-ce5a40ed3969/reviews
 
 ### Update une review
-PATCH  http://localhost:3000/api/v1/reviews/update/rev_ae43202e-a4f7-42dc-afd8-9dd44360ba58
+PATCH  http://localhost:3000/api/v1/reviews/rev_ae43202e-a4f7-42dc-afd8-9dd44360ba58
 Content-Type: application/json
 
 {
@@ -63,4 +63,4 @@ Content-Type: application/json
 }
 
 ### Delete a review
-DELETE http://localhost:3000/api/v1/reviews/delete/rev_a90eb434-f76d-4fca-b37f-0b6450e91ef1
+DELETE http://localhost:3000/api/v1/reviews/rev_a90eb434-f76d-4fca-b37f-0b6450e91ef1

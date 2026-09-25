@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Res } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Res, HttpCode } from '@nestjs/common';
 import { ReviewsService } from './reviews.service';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
@@ -20,7 +20,7 @@ export class ReviewsController {
     return this.reviewService.findAll();
   }
 
-  @Get('/places/:placeId/reviews')
+  @Get('places/:placeId/reviews')
   findAllFor(@Param('placeId') placeId: string){
     return this.reviewService.findAllFor(placeId);
   }
@@ -30,14 +30,13 @@ export class ReviewsController {
     return this.reviewService.findOne(id);
   }
 
-  @Patch('reviews/update/:id')
-  async update(@Param('id') id: string, @Body() updateReviewDto: UpdateReviewDto, @Res({passthrough: true}) res: Response) {
-    const updatedReview = await this.reviewService.update(id, updateReviewDto);
-    res.setHeader('Location', `api/v1/reviews/${updatedReview.id}`);
-    return updatedReview;
+  @Patch('reviews/:id')
+  async update(@Param('id') id: string, @Body() updateReviewDto: UpdateReviewDto) {
+    return await this.reviewService.update(id, updateReviewDto);
   }
 
-  @Delete('reviews/delete/:id')
+  @HttpCode(204)
+  @Delete('reviews/:id')
   remove(@Param('id') id: string) {
     return this.reviewService.remove(id);
   }

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Res, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Res, Query, HttpCode } from '@nestjs/common';
 import { PlacesService } from './places.service';
 import { CreatePlaceDto } from './dto/create-place.dto';
 import { UpdatePlaceDto } from './dto/update-place.dto';
@@ -26,14 +26,13 @@ export class PlacesController {
     return await this.placesService.findOne(id);
   }
 
-  @Patch('update/:id')
-  async update(@Param('id') id: string, @Body() updatePlaceDto: UpdatePlaceDto, @Res({passthrough: true}) res: Response) {
-    const updatedPlace = await this.placesService.update(id, updatePlaceDto);
-    res.setHeader('Location', `api/v1/places/${updatedPlace.id}`);
-    return updatedPlace;
+  @Patch(':id')
+  async update(@Param('id') id: string, @Body() updatePlaceDto: UpdatePlaceDto) {
+    return await this.placesService.update(id, updatePlaceDto);
   }
 
-  @Delete('delete/:id')
+  @HttpCode(204)
+  @Delete(':id')
   async remove(@Param('id') id: string) {
     return await this.placesService.remove(id);
   }
