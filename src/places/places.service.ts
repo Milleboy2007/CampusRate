@@ -2,99 +2,79 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { CreatePlaceDto } from './dto/create-place.dto';
 import { UpdatePlaceDto } from './dto/update-place.dto';
 import { randomUUID } from 'node:crypto';
-import { STATE } from './enum/place-enum';
-import { Place } from './entities/place.entity';
+import { Place } from './schemas/place.schema';
 import { FiltrePagePlaceDto } from './dto/filtre-page-place.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class PlacesService {
   
   constructor(
+    @InjectModel(Place.name) private readonly placeModel: Model<Place>
   ){}
 
   async create(createPlaceDto: CreatePlaceDto) {
-    const newPlace: Place = {
+    const newPlace: Partial<Place> = {
       id: `plc_${randomUUID()}`,
-      services: createPlaceDto.services || [],
-      status: createPlaceDto.status || STATE.ACTIVE,
-      ...createPlaceDto,
-      averageRating: null,
-      reviewCount: 0,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      ...createPlaceDto
     }
 
-    //await this.jsonService.addToDb(newPlace, "places");
-    return newPlace;
+    return this.placeModel.create(newPlace);
   }
 
   async findAll(filterPageDto: FiltrePagePlaceDto) {
-    // const {category, page = 1, limit = 10} = filterPageDto;
+    const {category, page = 1, limit = 10} = filterPageDto;
 
-    // if(limit > 100) throw new BadRequestException("Limit is too high, please put equal or under 100")
+    if(limit > 100) throw new BadRequestException("Limit is too high, please put equal or under 100")
 
-    //let places = await this.jsonService.readOneTab<Place>("places");
+    const filter: any = {};
+    if(category) filter.category = category;
 
-    // if(category) places = places.filter(place => place.category == category);
-    // const nbPage = Math.ceil(places.length / limit);
-    // if(page > nbPage && places.length > 0) throw new BadRequestException(`Page given too high! Amount of page: ${nbPage}`);
+    const totalItems = await this.placeModel.countDocuments(filter).exec();
+    const nbPage = Math.ceil(totalItems / limit);
+    if(page > nbPage && totalItems > 0) throw new BadRequestException(`Page given too high! Amount of page: ${nbPage}`);
 
-    // const startIndex = (page - 1) * limit;
-    // const endIndex = startIndex + limit;
+    const startIndex = (page - 1) * limit;
 
-    //const paginatedPlaces = places.slice(startIndex, endIndex);
+    const paginatedPlaces = await this.placeModel.find(filter).skip(startIndex).limit(limit).exec();
 
-    // return {
-    //   "data": paginatedPlaces,
-    //   "pagination": {
-    //     "page": page,
-    //     "limit": limit,
-    //     "totalItems": places.length,
-    //     "totalPages": nbPage
-    //   }
-    // };
+    return {
+      "data": paginatedPlaces,
+      "pagination": {
+        "page": page,
+        "limit": limit,
+        "totalItems": totalItems,
+        "totalPages": nbPage
+      }
+    };
   }
 
-  async findOne(id: string): Promise<void>/*Promise<Place>*/ {
-    // const toFind = (await this.jsonService.readOneTab<Place>("places")).find(place => place.id == id);
+  async findOne(id: string): Promise<Place> {
+    const toFind = await this.placeModel.findOne({id: id}).exec();
 
-    // if(toFind){
-    //   return toFind;
-    // }else throw new NotFoundException(`No place found, is the id good? Id given: ${id}`)
+    if(toFind){
+      return toFind;
+    }else throw new NotFoundException(`No place found, is the id good? Id given: ${id}`)
   }
 
-  async update(id: string, updatePlaceDto: UpdatePlaceDto): Promise<UpdatePlaceDto>/*Promise<Place>*/ {
-    // const places = await this.jsonService.readOneTab<Place>("places");
-    // const isAt = places.findIndex(place => place.id == id);
+  async update(id: string, updatePlaceDto: UpdatePlaceDto):Promise<Place> {
+    const updatedPlace = await this.placeModel.findOneAndUpdate(
+      { id: id},
+      { $set: updatePlaceDto},
+      { returnDocument: 'after'}
+    ).exec();
 
-    // if(isAt == -1) throw new NotFoundException(`No place found, is the id good? Id given: ${id}`);
-    
+    if (!updatedPlace) throw new NotFoundException(`No place found, is the id good? Id given: ${id}`);
 
-    // const updatedPlace: Place = {
-    //   ...places[isAt],
-    //   ...updatePlaceDto,
-    //   updatedAt: new Date()
-    // }
-    // places[isAt] = updatedPlace;
-
-    // await this.jsonService.updateDB("places", places);
-
-    // return updatedPlace;
-    return updatePlaceDto;
+    return updatedPlace;
   }
 
   async remove(id: string) {
-    // const places = await this.jsonService.readOneTab<Place>("places");
-    // const place = await this.findOne(id);
+    const toRemove = await this.findOne(id);
 
-    // const reviews = (await this.jsonService.readOneTab<any>('reviews')).filter(rev => rev.placeId == place.id);
+    if(toRemove.reviewCount > 0) throw new BadRequestException(`This place has reviews! Delete reviews before the place. Amount of reviews: ${toRemove.reviewCount}`);
 
-    // if(reviews.length > 0) throw new BadRequestException(`This place have reviews! Delete reviews before the place. Amount of reviews: ${reviews.length}`);
-
-    // const deleteAt = places.findIndex(p => p.id == place.id);
-
-    // places.splice(deleteAt, 1);
-
-    // return await this.jsonService.updateDB("places", places);
+    await this.placeModel.deleteOne({id: toRemove.id}).exec();
   }
 }

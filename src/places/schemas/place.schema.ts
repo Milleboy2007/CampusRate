@@ -28,6 +28,9 @@ export class Place extends Document {
     @Prop({required: true})
     address: string;
 
+    @Prop({type: [String], default: []})
+    services: string[];
+
     @Prop({enum: STATE, default: STATE.ACTIVE})
     status: STATE;
 
