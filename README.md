@@ -10,12 +10,13 @@ CampusRate est une API RESTful conçue pour permettre aux étudiants d'un campus
 ## ✨ Fonctionnalités
 - **Gestion des Endroits (Places) :** Opérations CRUD complètes avec filtrage par catégorie et système de pagination.
 - **Gestion des Appréciations (Reviews) :** Publication d'avis avec contraintes strictes (notes de 1 à 5, longueur du commentaire).
-- **Statistiques dynamiques :** Recalcul automatique et en temps réel de la note moyenne et du nombre d'avis sur l'entité parente.
+- **Statistiques dynamiques :** Recalcul automatique et en temps réel de la note moyenne et du nombre d'avis sur l'entité parente, via des agrégations MongoDB performantes..
 - **Sécurité des suppressions :** Blocage automatique de la suppression d'un endroit s'il possède encore des appréciations.
 
 ## 🛠️ Technologies
 - **Framework :** NestJS (Node.js)
 - **Langage :** TypeScript
+- **Base de données :** MongoDB avec Mongoose
 - **Validation :** `class-validator` et `class-transformer`
 - **Documentation :** Swagger / OpenAPI (`@nestjs/swagger`)
 - **Tests API :** Postman
@@ -39,7 +40,7 @@ Avant de lancer l'application, il est obligatoire de configurer l'environnement 
    ```
 2. Modifiez le fichier `.env` pour définir vos variables :
    - `PORT` : Le port d'écoute du serveur (ex: `3000`).
-   - `DATA_FILE_PATH` : Le chemin vers le fichier de persistance des données (ex: `db.json`). L'application validera l'extension de ce fichier au démarrage.
+   - `MONGO_URI` : Le lien d'accès a la base de donnée Mongo.
 
 ### Installation
 Clonez le dépôt sur votre machine locale, puis installez les dépendances :
@@ -49,18 +50,13 @@ npm install
 
 ---
 
-## 📂 Architecture et Persistance JSON
+## 📂 Architecture et Persistance MongoDB
 
 Le projet adopte une architecture modulaire en couches afin de garantir une séparation stricte des responsabilités (Separation of Concerns) :
 
 1. **Contrôleurs (Présentation) :** Les fichiers `places.controller.ts` et `reviews.controller.ts` gèrent exclusivement le routage HTTP, la validation des DTO d'entrée, et le formatage des réponses (codes HTTP, en-tête `Location`).
 2. **Services Métier (Logique) :** Les fichiers `places.service.ts` et `reviews.service.ts` centralisent les règles d'affaires. Ils gèrent notamment le recalcul des statistiques (`averageRating`, `reviewCount`) et la logique interdisant la suppression d'un endroit possédant des appréciations.
-3. **Persistance des données (`JsonService`) :** La couche d'accès aux données est totalement isolée dans le `JsonService`. Ce service est le seul à interagir avec le système de fichiers en utilisant l'API asynchrone `node:fs/promises`.
-
-**Format et gestion du fichier :**
-- Les données sont stockées sous la forme d'un objet JSON global contenant des tableaux de ressources (ex: `{"places": [], "reviews": []}`).
-- Au démarrage (`onModuleInit`), le service vérifie l'existence du fichier. S'il est absent, il initialise proprement un fichier contenant un objet JSON vide `{}`.
-- Si le fichier est présent mais corrompu, l'API produit une erreur contrôlée et refuse de démarrer pour protéger l'intégrité des données.
+3. **Persistance des données (Mongoose) :** La couche d'accès aux données est gérée par des schémas Mongoose stricts. L'API communique de manière asynchrone avec une base de données MongoDB, ce qui assure la robustesse et la scalabilité des opérations de lecture/écriture.
 
 ---
 
@@ -118,7 +114,5 @@ Une collection complète de scénarios (`CampusRate API.postman_collection.json`
 ---
 
 ## ⚠️ Limites connues
-Puisqu'il s'agit d'une version de démonstration architecturale, le projet présente actuellement les limites suivantes :
-1. **Persistance en fichier JSON :** La base de données utilise le système de fichiers local (`JsonService`). Bien que fonctionnel et asynchrone, ce mécanisme n'est pas conçu pour des accès concurrentiels massifs en production.
-2. **Absence d'authentification :** L'API est actuellement entièrement publique. Aucun système de jetons JWT ou de limitation de requêtes (Rate Limiting) n'est implémenté pour le moment.
-3. **Pagination basique :** La pagination est gérée en mémoire par l'application, ce qui serait inefficace avec un volume massif de données réelles.
+Le projet présente actuellement la limite suivante :
+1. **Absence d'authentification :** L'API est actuellement entièrement publique. Aucun système de jetons JWT ou de limitation de requêtes (Rate Limiting) n'est implémenté pour le moment.
