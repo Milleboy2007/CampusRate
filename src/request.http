@@ -3,7 +3,7 @@ POST https://localhost:3001/api/v1/places
 Content-Type: application/json
 
 {
-    "name": "Test2",
+    "name": "Test4",
     "description": "Test",
     "category": "LIBRARY",
     "address": "Test rue du test, Montreal"  

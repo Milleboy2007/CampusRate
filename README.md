@@ -44,6 +44,7 @@ Avant de lancer l'application, il est obligatoire de configurer l'environnement 
    - `PORT` : Le port d'écoute du serveur (ex: `3000`).
    - `MONGO_URI` : Le lien d'accès a la base de donnée Mongo.
    - `EMP_HTTPS_INFO` : dossier d'emplacement du certificat et de la clé pour HTTPS
+   - `CORS_ALLOWED_ORIGIN` : les chemins autoriser par CORS pour communiqué avec l'API
 
 ### Installation
 Clonez le dépôt sur votre machine locale, puis installez les dépendances :
@@ -129,6 +130,12 @@ Le projet présente actuellement la limite suivante :
 - **8.1 - M3 :** Pour la relation entre les endroits(`places`) et les avis(`reviews`), j'ai opté pour un modèle par référence où chaque avis contient l'ID de l'endroit (`placeId`), plutôt que d'imbriquer un tableau d'avis directement dans le document de l'endroit. Ce choix a été fait car le nombre d'avis pour un lieu peut augmenter indéfiniment. Si les avis étaient imbriqués, le document de l'endroit serait devenu extrêmement lourd et sa récupération aurait été beaucoup trop longue, même lorsque l'on ne souhaite pas consulter les avis.
 
 -point: 12
+
+### Sécurité HTTP avancée
+- **8.2 - H1:** Un système de limitation de requêtes (Rate Limiting) a été ajouté à l'aide de `@nestjs/throttler`. Il est configuré globalement au niveau de l'`AppModule` (via `APP_GUARD`) pour protéger l'API contre les abus. La limite actuelle est fixée à 100 requêtes par minute par adresse IP. Tout dépassement retourne automatiquement une erreur HTTP 429 (Too Many Requests).
+- **8.2 - H2:** La taille du corps des requêtes HTTP a été strictement limitée à 100kb via le middleware `json` d'Express. Tout dépassement bloque la requête et génère automatiquement une erreur HTTP 413 (Payload Too Large).
+- **8.2 - H4:** La configuration CORS a été ajustée pour restreindre les origines autorisées de manière dynamique via la variable d'environnement `CORS_ALLOWED_ORIGIN`, renforçant la sécurité selon le déploiement.
+- **8.2 - H5:** Les méthodes HTTP autorisées ont été explicitement restreintes aux seules méthodes nécessaires (`GET`, `POST`, `PATCH`, `DELETE`) dans la configuration CORS.
 
 ### HTTPS / TLS
 - **8.3 - T1: explication du rôle de HTTPS** - Le protocole **HTTPS** chiffre les communications entre le **client** (ex: navigateur, Postman) et notre **API**. Sans ce chiffrement (HTTP simple), **toutes** les données transiteraient en **"texte clair"**, permettant à **quiconque** interceptant le réseau de lire ou de modifier les requêtes (attaque `Man-in-the-Middle`). **HTTPS** garantit ainsi la confidentialité et l'intégrité des données échangées.

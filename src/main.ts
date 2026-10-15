@@ -11,6 +11,7 @@ import * as path from 'path';
 import * as http from 'http';
 
 import * as dotenv from 'dotenv';
+import { json } from 'express';
 dotenv.config();
 
 async function bootstrap() {
@@ -23,6 +24,7 @@ async function bootstrap() {
     httpsOptions
   });
 
+  app.use(json({limit: '100kb'}));
 
   app.use(helmet());
 
@@ -34,7 +36,7 @@ async function bootstrap() {
   });
 
   app.enableCors({
-    origin: ['http://localhost:8080'],
+    origin: process.env.CORS_ALLOWED_ORIGIN || ['http://localhost:8080'],
     methods: ['GET', 'POST', 'PATCH', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
