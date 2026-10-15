@@ -5,6 +5,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { ProblemDetailsFilter } from './common/filters/problem-details.filter';
 import { configureSwagger } from './configure-swagger';
 import helmet from 'helmet';
+import mongoSanitize from 'express-mongo-sanitize';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as http from 'http';
@@ -24,6 +25,8 @@ async function bootstrap() {
 
 
   app.use(helmet());
+
+  app.use(mongoSanitize())
 
   app.enableCors({
     origin: ['http://localhost:8080'],

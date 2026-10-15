@@ -140,3 +140,10 @@ Le projet présente actuellement la limite suivante :
 - 8.3 - T4: Redirection automatique HTTP vers HTTPS fonctionnelle.
 
 - point: 10
+
+### Protection supplémentaire contre les entrées dangereuses
+- **8.4 - P1:** Une "allowlist" stricte est appliquée globalement via le `ValidationPipe` (`whitelist: true`, `forbidNonWhitelisted: true`). De plus, les filtres de recherche (Query Parameters) sont validés via des DTOs utilisant le décorateur `@IsEnum()` pour s'assurer que seules les valeurs prévues sont traitées.
+- **8.4 - P2:** Le DTO de modification est un `PartialType` du DTO de création et ne possède donc aucune valeur qui ne devrait pas être modifiée telles que l'`id`, `createdAt` ou `updatedAt`.
+- **8.4 - P3:** Le middleware `express-mongo-sanitize` a été intégré au niveau global dans `main.ts`. Il agit comme un bouclier contre les injections NoSQL en nettoyant systématiquement les opérateurs réservés (ex: commençant par `$`) des paramètres, requêtes et corps HTTP/HTTPS.
+
+- point: 7
