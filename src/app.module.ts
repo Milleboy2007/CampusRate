@@ -7,6 +7,8 @@ import { ReviewsModule } from './reviews/reviews.module';
 import databaseConfig from './config/database.config';
 import * as Joi from 'joi';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -27,10 +29,18 @@ import { MongooseModule } from '@nestjs/mongoose';
         autoIndex: process.env.NODE_ENV !== 'production'
       })
     }),
+    ThrottlerModule.forRoot([{
+      ttl: 60000, //temp de vie en miliseconde
+      limit: 100 // nb max de requête par ip
+    }]),
     PlacesModule,
     ReviewsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, 
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard
+    }],
 })
 export class AppModule {}

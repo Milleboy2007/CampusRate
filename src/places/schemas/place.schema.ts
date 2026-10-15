@@ -18,7 +18,7 @@ export class Place extends Document {
     @Prop({required: true, unique: true})
     id: string;
 
-    @Prop({required: true})
+    @Prop({required: true, unique: true})
     @ApiProperty({ example: 'Bibliothèque principale', description: "Nom de l'endroit" })
     name: string;
 

@@ -2,9 +2,12 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode } from '@ne
 import { ReviewsService } from './reviews.service';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
-import { ApiTags, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiParam, ApiResponse, ApiPayloadTooLargeResponse, ApiTooManyRequestsResponse } from '@nestjs/swagger';
 import { Review } from './schemas/review.schema';
 
+@ApiTooManyRequestsResponse({ 
+    description: 'Limite de requêtes dépassée (Rate Limiting). Veuillez patienter avant de réessayer.' 
+  })
 @ApiTags("Reviews")
 @Controller()
 export class ReviewsController {
@@ -16,6 +19,9 @@ export class ReviewsController {
   @ApiResponse({ status: 201, description: "L'appréciation a été créée avec succès.", type: Review })
   @ApiResponse({ status: 400, description: 'Erreur de validation des données (Problem Details).' })
   @ApiResponse({ status: 404, description: 'Endroit introuvable (Problem Details).' })
+  @ApiPayloadTooLargeResponse({ 
+    description: 'Le corps de la requête dépasse la limite autorisée de 100kb.' 
+  })
   async create(@Param('placeId') placeId: string, @Body() createReviewDto: CreateReviewDto) {
     const newReview = await this.reviewService.create(placeId, createReviewDto);
     return newReview;
@@ -52,6 +58,9 @@ export class ReviewsController {
   @ApiResponse({ status: 200, description: "L'appréciation a été mise à jour.", type: Review })
   @ApiResponse({ status: 400, description: 'Erreur de validation (Problem Details).' })
   @ApiResponse({ status: 404, description: 'Appréciation introuvable (Problem Details).' })
+  @ApiPayloadTooLargeResponse({ 
+    description: 'Le corps de la requête dépasse la limite autorisée de 100kb.' 
+  })
   async update(@Param('id') id: string, @Body() updateReviewDto: UpdateReviewDto) {
     return await this.reviewService.update(id, updateReviewDto);
   }

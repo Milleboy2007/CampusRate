@@ -60,3 +60,5 @@ db.json
 
 # TypeScript cache
 *.tsbuildinfo
+
+secrets
