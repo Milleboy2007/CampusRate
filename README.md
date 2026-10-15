@@ -122,6 +122,14 @@ Le projet présente actuellement la limite suivante :
 1. **Absence d'authentification :** L'API est actuellement entièrement publique. Aucun système de jetons JWT ou de limitation de requêtes (Rate Limiting) n'est implémenté pour le moment.
 
 ## ✏️ Option réaliser dans le projet
+
+### MongoDB avancé
+- **8.1 - M1 :** Un index unique a été ajouté sur le **nom** des endroits (`places`) afin d'éviter que deux endroits ne possèdent exactement le même nom.
+- **8.1 - M2 :** Une agrégation MongoDB a été réalisée dans `reviewsService.updatePlaceStats()` pour calculer dynamiquement la note moyenne et le nombre d'avis.
+- **8.1 - M3 :** Pour la relation entre les endroits(`places`) et les avis(`reviews`), j'ai opté pour un modèle par référence où chaque avis contient l'ID de l'endroit (`placeId`), plutôt que d'imbriquer un tableau d'avis directement dans le document de l'endroit. Ce choix a été fait car le nombre d'avis pour un lieu peut augmenter indéfiniment. Si les avis étaient imbriqués, le document de l'endroit serait devenu extrêmement lourd et sa récupération aurait été beaucoup trop longue, même lorsque l'on ne souhaite pas consulter les avis.
+
+-point: 12
+
 ### HTTPS / TLS
 - **8.3 - T1: explication du rôle de HTTPS** - Le protocole **HTTPS** chiffre les communications entre le **client** (ex: navigateur, Postman) et notre **API**. Sans ce chiffrement (HTTP simple), **toutes** les données transiteraient en **"texte clair"**, permettant à **quiconque** interceptant le réseau de lire ou de modifier les requêtes (attaque `Man-in-the-Middle`). **HTTPS** garantit ainsi la confidentialité et l'intégrité des données échangées.
 - **8.3 - T2:** CampusRate est fonctionnel localement avec HTTPS.
@@ -131,3 +139,4 @@ Le projet présente actuellement la limite suivante :
 ```
 - 8.3 - T4: Redirection automatique HTTP vers HTTPS fonctionnelle.
 
+- point: 10
