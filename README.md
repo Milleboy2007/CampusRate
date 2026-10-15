@@ -10,14 +10,16 @@ CampusRate est une API RESTful conçue pour permettre aux étudiants d'un campus
 ## ✨ Fonctionnalités
 - **Gestion des Endroits (Places) :** Opérations CRUD complètes avec filtrage par catégorie et système de pagination.
 - **Gestion des Appréciations (Reviews) :** Publication d'avis avec contraintes strictes (notes de 1 à 5, longueur du commentaire).
-- **Statistiques dynamiques :** Recalcul automatique et en temps réel de la note moyenne et du nombre d'avis sur l'entité parente, via des agrégations MongoDB performantes..
+- **Statistiques dynamiques :** Recalcul automatique et en temps réel de la note moyenne et du nombre d'avis sur l'entité parente, via des agrégations MongoDB performantes.
 - **Sécurité des suppressions :** Blocage automatique de la suppression d'un endroit s'il possède encore des appréciations.
+- **Sécurité HTTP :** Durcissement des en-têtes HTTP via Helmet et restriction stricte des origines (CORS).
 
 ## 🛠️ Technologies
 - **Framework :** NestJS (Node.js)
 - **Langage :** TypeScript
 - **Base de données :** MongoDB avec Mongoose
 - **Validation :** `class-validator` et `class-transformer`
+- **Sécurité :** Helmet et configuration CORS
 - **Documentation :** Swagger / OpenAPI (`@nestjs/swagger`)
 - **Tests API :** Postman
 
