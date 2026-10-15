@@ -10,13 +10,16 @@ CampusRate est une API RESTful conçue pour permettre aux étudiants d'un campus
 ## ✨ Fonctionnalités
 - **Gestion des Endroits (Places) :** Opérations CRUD complètes avec filtrage par catégorie et système de pagination.
 - **Gestion des Appréciations (Reviews) :** Publication d'avis avec contraintes strictes (notes de 1 à 5, longueur du commentaire).
-- **Statistiques dynamiques :** Recalcul automatique et en temps réel de la note moyenne et du nombre d'avis sur l'entité parente.
+- **Statistiques dynamiques :** Recalcul automatique et en temps réel de la note moyenne et du nombre d'avis sur l'entité parente, via des agrégations MongoDB performantes.
 - **Sécurité des suppressions :** Blocage automatique de la suppression d'un endroit s'il possède encore des appréciations.
+- **Sécurité HTTP :** Durcissement des en-têtes HTTP via Helmet et restriction stricte des origines (CORS).
 
 ## 🛠️ Technologies
 - **Framework :** NestJS (Node.js)
 - **Langage :** TypeScript
+- **Base de données :** MongoDB avec Mongoose
 - **Validation :** `class-validator` et `class-transformer`
+- **Sécurité :** Helmet et configuration CORS
 - **Documentation :** Swagger / OpenAPI (`@nestjs/swagger`)
 - **Tests API :** Postman
 
@@ -28,6 +31,9 @@ CampusRate est une API RESTful conçue pour permettre aux étudiants d'un campus
 - [Node.js](https://nodejs.org/) (version 18 ou supérieure)
 - npm (inclus avec Node.js)
 
+### Optionnel : Configurer une base de données MongoDB locale (Docker)
+Une configuration complète prête à l'emploi est disponible dans le dossier `config_db`. Pour l'utiliser, veuillez consulter les [instructions de configuration de la db avec Docker](config_db/README.md).
+
 ### Configuration de l'environnement
 Avant de lancer l'application, il est obligatoire de configurer l'environnement local. Un fichier `.env.example` est fourni à la racine du projet.
 1. Créez une copie de ce fichier et nommez-la `.env` :
@@ -36,7 +42,9 @@ Avant de lancer l'application, il est obligatoire de configurer l'environnement 
    ```
 2. Modifiez le fichier `.env` pour définir vos variables :
    - `PORT` : Le port d'écoute du serveur (ex: `3000`).
-   - `DATA_FILE_PATH` : Le chemin vers le fichier de persistance des données (ex: `db.json`). L'application validera l'extension de ce fichier au démarrage.
+   - `MONGO_URI` : Le lien d'accès a la base de donnée Mongo.
+   - `EMP_HTTPS_INFO` : dossier d'emplacement du certificat et de la clé pour HTTPS.
+   - `CORS_ALLOWED_ORIGIN` : L'origine autorisée par CORS pour communiquer avec l'API.
 
 ### Installation
 Clonez le dépôt sur votre machine locale, puis installez les dépendances :
@@ -46,18 +54,13 @@ npm install
 
 ---
 
-## 📂 Architecture et Persistance JSON
+## 📂 Architecture et Persistance MongoDB
 
 Le projet adopte une architecture modulaire en couches afin de garantir une séparation stricte des responsabilités (Separation of Concerns) :
 
 1. **Contrôleurs (Présentation) :** Les fichiers `places.controller.ts` et `reviews.controller.ts` gèrent exclusivement le routage HTTP, la validation des DTO d'entrée, et le formatage des réponses (codes HTTP, en-tête `Location`).
 2. **Services Métier (Logique) :** Les fichiers `places.service.ts` et `reviews.service.ts` centralisent les règles d'affaires. Ils gèrent notamment le recalcul des statistiques (`averageRating`, `reviewCount`) et la logique interdisant la suppression d'un endroit possédant des appréciations.
-3. **Persistance des données (`JsonService`) :** La couche d'accès aux données est totalement isolée dans le `JsonService`. Ce service est le seul à interagir avec le système de fichiers en utilisant l'API asynchrone `node:fs/promises`.
-
-**Format et gestion du fichier :**
-- Les données sont stockées sous la forme d'un objet JSON global contenant des tableaux de ressources (ex: `{"places": [], "reviews": []}`).
-- Au démarrage (`onModuleInit`), le service vérifie l'existence du fichier. S'il est absent, il initialise proprement un fichier contenant un objet JSON vide `{}`.
-- Si le fichier est présent mais corrompu, l'API produit une erreur contrôlée et refuse de démarrer pour protéger l'intégrité des données.
+3. **Persistance des données (Mongoose) :** La couche d'accès aux données est gérée par des schémas Mongoose stricts. L'API communique de manière asynchrone avec une base de données MongoDB, ce qui assure la robustesse et la scalabilité des opérations de lecture/écriture.
 
 ---
 
@@ -68,7 +71,8 @@ Pour lancer l'API en mode développement (avec rechargement à chaud) :
 ```bash
 npm run start:dev
 ```
-L'API sera accessible à l'adresse : `http://localhost:3000/api/v1`
+L'API sera accessible à l'adresse : `https://localhost:3001/api/v1`
+> Note: une demande HTTP sur le port 3000 redirige automatiquement vers le lien HTTPS sur le port configurer dans le .env
 
 ### Lint (Vérification du code)
 Pour analyser le code et s'assurer qu'il respecte les standards ESLint du projet :
@@ -88,7 +92,7 @@ Les fichiers compilés seront générés dans le dossier `/dist`.
 ## 📖 Swagger UI
 L'API intègre une documentation interactive complète et auto-générée via OpenAPI. 
 Une fois le serveur démarré, naviguez vers :
-👉 `http://localhost:3000/docs`
+👉 `https://localhost:3001/docs`
 
 Cette interface permet de visualiser le schéma exact des requêtes/réponses, les contraintes de validation, et d'exécuter des requêtes de test directement depuis le navigateur.
 
@@ -115,7 +119,42 @@ Une collection complète de scénarios (`CampusRate API.postman_collection.json`
 ---
 
 ## ⚠️ Limites connues
-Puisqu'il s'agit d'une version de démonstration architecturale, le projet présente actuellement les limites suivantes :
-1. **Persistance en fichier JSON :** La base de données utilise le système de fichiers local (`JsonService`). Bien que fonctionnel et asynchrone, ce mécanisme n'est pas conçu pour des accès concurrentiels massifs en production.
-2. **Absence d'authentification :** L'API est actuellement entièrement publique. Aucun système de jetons JWT ou de limitation de requêtes (Rate Limiting) n'est implémenté pour le moment.
-3. **Pagination basique :** La pagination est gérée en mémoire par l'application, ce qui serait inefficace avec un volume massif de données réelles.
+Le projet présente actuellement la limite suivante :
+1. **Absence d'authentification :** L'API est actuellement entièrement publique. Aucun système de jetons JWT n'est implémenté afin de restreindre l'accès aux routes selon le rôle de l'utilisateur pour le moment.
+
+## ✏️ Options réalisées dans le projet
+
+### MongoDB avancé
+- **8.1 - M1 :** Un index unique a été ajouté sur le **nom** des endroits (`places`) afin d'éviter que deux endroits ne possèdent exactement le même nom.
+- **8.1 - M2 :** Une agrégation MongoDB a été réalisée dans `reviewsService.updatePlaceStats()` pour calculer dynamiquement la note moyenne et le nombre d'avis.
+- **8.1 - M3 :** Pour la relation entre les endroits(`places`) et les avis(`reviews`), j'ai opté pour un modèle par référence où chaque avis contient l'ID de l'endroit (`placeId`), plutôt que d'imbriquer un tableau d'avis directement dans le document de l'endroit. Ce choix a été fait car le nombre d'avis pour un lieu peut augmenter indéfiniment. Si les avis étaient imbriqués, le document de l'endroit serait devenu extrêmement lourd et sa récupération aurait été beaucoup trop longue, même lorsque l'on ne souhaite pas consulter les avis.
+
+-**Points: 12**
+
+### Sécurité HTTP avancée
+- **8.2 - H1:** Un système de limitation de requêtes (Rate Limiting) a été ajouté à l'aide de `@nestjs/throttler`. Il est configuré globalement au niveau de l'`AppModule` (via `APP_GUARD`) pour protéger l'API contre les abus. La limite actuelle est fixée à 100 requêtes par minute par adresse IP. Tout dépassement retourne automatiquement une erreur HTTP 429 (Too Many Requests).
+- **8.2 - H2:** La taille du corps des requêtes HTTP a été strictement limitée à 100kb via le middleware `json` d'Express. Tout dépassement bloque la requête et génère automatiquement une erreur HTTP 413 (Payload Too Large).
+- **8.2 - H4:** La configuration CORS a été ajustée pour restreindre les origines autorisées de manière dynamique via la variable d'environnement `CORS_ALLOWED_ORIGIN`, renforçant la sécurité selon le déploiement.
+- **8.2 - H5:** Les méthodes HTTP autorisées ont été explicitement restreintes aux seules méthodes nécessaires (`GET`, `POST`, `PATCH`, `DELETE`) dans la configuration CORS.
+
+- **Points: 9**
+
+### HTTPS / TLS
+- **8.3 - T1: explication du rôle de HTTPS** - Le protocole **HTTPS** chiffre les communications entre le **client** (ex: navigateur, Postman) et notre **API**. Sans ce chiffrement (HTTP simple), **toutes** les données transiteraient en **"texte clair"**, permettant à **quiconque** interceptant le réseau de lire ou de modifier les requêtes (attaque `Man-in-the-Middle`). **HTTPS** garantit ainsi la confidentialité et l'intégrité des données échangées.
+- **8.3 - T2:** CampusRate est fonctionnel localement avec HTTPS.
+- **8.3 - T3:** Le certificat et la clé ont été générés dans un dossier `secrets`, qui a été placé dans le `.gitignore` pour ne pas divulguer les informations sensibles. Le certificat et la clé ont été générés avec la commande suivante :
+```bash
+   openssl req -x509 -newkey rsa:4096 -keyout secrets/key.pem -out secrets/cert.pem -days 90 -nodes -subj "//CN=localhost"
+```
+- 8.3 - T4: Redirection automatique HTTP vers HTTPS fonctionnelle.
+
+- **Points: 10**
+
+### Protection supplémentaire contre les entrées dangereuses
+- **8.4 - P1:** Une "allowlist" stricte est appliquée globalement via le `ValidationPipe` (`whitelist: true`, `forbidNonWhitelisted: true`). De plus, les filtres de recherche (Query Parameters) sont validés via des DTOs utilisant le décorateur `@IsEnum()` pour s'assurer que seules les valeurs prévues sont traitées.
+- **8.4 - P2:** Le DTO de modification est un `PartialType` du DTO de création et ne possède donc aucune valeur qui ne devrait pas être modifiée telles que l'`id`, `createdAt` ou `updatedAt`.
+- **8.4 - P3:** Le middleware `express-mongo-sanitize` a été intégré au niveau global dans `main.ts`. Il agit comme un bouclier contre les injections NoSQL en nettoyant systématiquement les opérateurs réservés (ex: commençant par `$`) des paramètres, requêtes et corps HTTP/HTTPS.
+
+- **Points: 7**
+---
+- _**total de points optionnels: 38**_

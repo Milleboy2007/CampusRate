@@ -1,66 +1,81 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
-import { JsonService } from '../json.service';
-import { Review } from './entities/review.entity';
+import { Review } from './schemas/review.schema';
 import { randomUUID } from 'node:crypto';
 import { PlacesService } from '../places/places.service';
-import { Place } from '../places/entities/place.entity';
+import { Place } from '../places/schemas/place.schema';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class ReviewsService {
 
   constructor(
-    private readonly jsonService: JsonService,
+    @InjectModel(Review.name) private readonly reviewModel: Model<Review>,
+    @InjectModel(Place.name) private readonly placeModel: Model<Place>,
     private readonly placesService: PlacesService
   ){}
 
-  private async updatePlaceStats(place: Place){
-    const reviews = await this.findAllFor(place.id);
-    const places = await this.jsonService.readOneTab<Place>('places');
-    const placeIndex = places.findIndex(p => p.id == place.id);
-    const nbReviews = reviews.length;
+  private async updatePlaceStats(placeId: string){
+    const stats = await this.reviewModel.aggregate([
+      {$match:{placeId: placeId}},
+      {
+        $group:{
+          _id: '$placeId',
+          averageRating: {$avg:'$rating'},
+          reviewCount: {$sum: 1}
+        }
+      }
+    ]);
 
-    if(placeIndex != -1){
-      places[placeIndex].averageRating = nbReviews > 0 ? Math.round((reviews.reduce((sum, rev) => sum + rev.rating, 0)/nbReviews)*100)/100: null;
-      places[placeIndex].reviewCount = nbReviews;
-      places[placeIndex].updatedAt = new Date()
+    let newAvg = null;
+    let newCount = 0;
 
-      await this.jsonService.updateDB("places", places)
+    if(stats.length > 0){
+      newAvg = Math.round(stats[0].averageRating * 100) / 100;
+      newCount = stats[0].reviewCount;
     }
+
+    await this.placeModel.updateOne(
+      {id: placeId},
+      {
+        $set:{
+          averageRating: newAvg,
+          reviewCount:newCount
+        }
+      }
+    ).exec();
   }
 
   async create(placeId: string, createReviewDto: CreateReviewDto) {
 
     const place = await this.placesService.findOne(placeId);
 
-    const newReview: Review = {
+    const newReview: Partial<Review> = {
       id: `rev_${randomUUID()}`,
       placeId: place.id,
-      ...createReviewDto,
-      createdAt: new Date(),
-      updatedAt: new Date()
+      ...createReviewDto
     }
 
-    await this.jsonService.addToDb(newReview, "reviews");
+    await this.reviewModel.create(newReview);
 
-    await this.updatePlaceStats(place);
+    await this.updatePlaceStats(place.id);
 
     return newReview;
   }
 
   async findAll(): Promise<Review[]> {
-    return await this.jsonService.readOneTab<Review>('reviews');
+   return await this.reviewModel.find().exec();
   }
 
   async findAllFor(placeId: string){
-    const reviews = await this.jsonService.readOneTab<Review>('reviews');
     const place = await this.placesService.findOne(placeId);
-    return reviews.filter(rev => rev.placeId == place.id);
+    return this.reviewModel.find({placeId: place.id})
   }
 
   async findOne(id: string): Promise<Review> {
-    const toFind = (await this.findAll()).find(rev => rev.id == id);
+    const toFind = await this.reviewModel.findOne({id: id});
 
     if(toFind){
       return toFind;
@@ -68,35 +83,22 @@ export class ReviewsService {
   }
 
   async update(id: string, updateReviewDto: UpdateReviewDto) {
-    const reviews = await this.findAll();
-    const isAt = reviews.findIndex(rev => rev.id == id);
+    const updatedReview = await this.reviewModel.findOneAndUpdate(
+      {id:id},
+      {$set:updateReviewDto},
+      {returnDocument: 'after'}
+    ).exec();
 
-    if(isAt == -1) throw new NotFoundException(`No review found, is the id good? Id given: ${id}`);
+    if(!updatedReview) throw new NotFoundException(`No review found, is the id good? Id given: ${id}`);
 
-    const updatedReview: Review = {
-      ...reviews[isAt],
-      ...updateReviewDto,
-      updatedAt: new Date()
-    }
-
-    reviews[isAt] = updatedReview;
-
-    await this.jsonService.updateDB('reviews', reviews);
-
-    await this.updatePlaceStats(await this.placesService.findOne(reviews[isAt].placeId))
+    await this.updatePlaceStats(updatedReview.placeId);
 
     return updatedReview;
   }
 
   async remove(id: string) {
-    const reviews = await this.findAll();
     const review = await this.findOne(id);
-    const deleteAt = reviews.findIndex(rev => rev.id == review.id);
-    const placeId = reviews[deleteAt].placeId;
-
-    reviews.splice(deleteAt, 1);
-
-    await this.jsonService.updateDB("reviews", reviews);
-    await this.updatePlaceStats(await this.placesService.findOne(placeId));
+    await this.reviewModel.deleteOne({id: review.id}).exec();
+    await this.updatePlaceStats(review.placeId);
   }
 }

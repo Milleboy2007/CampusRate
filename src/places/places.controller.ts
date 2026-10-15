@@ -4,9 +4,12 @@ import { CreatePlaceDto } from './dto/create-place.dto';
 import { UpdatePlaceDto } from './dto/update-place.dto';
 import type { Response } from 'express';
 import { FiltrePagePlaceDto } from './dto/filtre-page-place.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
-import { Place } from './entities/place.entity';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiPayloadTooLargeResponse, ApiConflictResponse, ApiTooManyRequestsResponse } from '@nestjs/swagger';
+import { Place } from './schemas/place.schema';
 
+@ApiTooManyRequestsResponse({ 
+    description: 'Limite de requêtes dépassée (Rate Limiting). Veuillez patienter avant de réessayer.' 
+  })
 @ApiTags("Places")
 @Controller('places')
 export class PlacesController {
@@ -16,6 +19,12 @@ export class PlacesController {
   @ApiOperation({ summary: 'Créer un nouvel endroit' })
   @ApiResponse({ status: 201, description: "L'endroit a été créé avec succès.", type: Place })
   @ApiResponse({ status: 400, description: 'Erreur de validation des données (Problem Details).' })
+  @ApiPayloadTooLargeResponse({ 
+    description: 'Le corps de la requête dépasse la limite autorisée de 100kb.' 
+  })
+  @ApiConflictResponse({ 
+    description: 'Un endroit avec ce nom existe déjà.' 
+  })
   async create(@Body() createPlaceDto: CreatePlaceDto, @Res({passthrough: true}) res: Response) {
     const newPlace = await this.placesService.create(createPlaceDto);
     res.setHeader('Location', `api/v1/places/${newPlace.id}`);
@@ -54,6 +63,12 @@ export class PlacesController {
   @ApiResponse({ status: 200, description: "L'endroit a été mis à jour.", type: Place })
   @ApiResponse({ status: 400, description: 'Erreur de validation (Problem Details).' })
   @ApiResponse({ status: 404, description: 'Endroit introuvable (Problem Details).' })
+  @ApiPayloadTooLargeResponse({ 
+    description: 'Le corps de la requête dépasse la limite autorisée de 100kb.' 
+  })
+  @ApiConflictResponse({ 
+    description: 'Un endroit avec ce nom existe déjà.' 
+  })
   async update(@Param('id') id: string, @Body() updatePlaceDto: UpdatePlaceDto) {
     return await this.placesService.update(id, updatePlaceDto);
   }

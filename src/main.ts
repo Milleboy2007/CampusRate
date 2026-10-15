@@ -4,9 +4,42 @@ import { VersioningType } from '@nestjs/common';
 import { ValidationPipe } from '@nestjs/common';
 import { ProblemDetailsFilter } from './common/filters/problem-details.filter';
 import { configureSwagger } from './configure-swagger';
+import helmet from 'helmet';
+import mongoSanitize from 'express-mongo-sanitize';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as http from 'http';
+
+import * as dotenv from 'dotenv';
+import { json } from 'express';
+dotenv.config();
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const httpsOptions = {
+    key: fs.readFileSync(path.join(process.cwd(), `${process.env.EMP_HTTPS_INFO}/key.pem`)),
+    cert: fs.readFileSync(path.join(process.cwd(), `${process.env.EMP_HTTPS_INFO}/cert.pem`))
+  }
+
+  const app = await NestFactory.create(AppModule, {
+    httpsOptions
+  });
+
+  app.use(json({limit: '100kb'}));
+
+  app.use(helmet());
+
+  app.use((req: any, res: any, next: any) => {
+    if (req.body) mongoSanitize.sanitize(req.body);
+    if (req.query) mongoSanitize.sanitize(req.query);
+    if (req.params) mongoSanitize.sanitize(req.params);
+    next();
+  });
+
+  app.enableCors({
+    origin: process.env.CORS_ALLOWED_ORIGIN || ['http://localhost:8080'],
+    methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  });
 
   app.setGlobalPrefix('api');
 
@@ -27,6 +60,14 @@ async function bootstrap() {
 
   configureSwagger(app);
 
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.PORT ?? 3001);
+
+  http.createServer((req, res) => {
+    const redirectUrl = `https://${req.headers.host?.split(":")[0]}:${process.env.PORT}${req.url}`;
+    res.writeHead(302, { Location: redirectUrl });
+    res.end();
+  }).listen(3000, () => {
+    console.log(`➡️  Serveur de redirection (HTTP) en écoute sur : http://localhost:3000`);
+  });
 }
 bootstrap();
