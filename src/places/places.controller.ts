@@ -5,7 +5,7 @@ import { UpdatePlaceDto } from './dto/update-place.dto';
 import type { Response } from 'express';
 import { FiltrePagePlaceDto } from './dto/filtre-page-place.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
-import { Place } from './entities/place.entity';
+import { Place } from './schemas/place.schema';
 
 @ApiTags("Places")
 @Controller('places')

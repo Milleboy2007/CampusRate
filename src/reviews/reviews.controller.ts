@@ -1,10 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Res, HttpCode } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode } from '@nestjs/common';
 import { ReviewsService } from './reviews.service';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
-import type { Response } from 'express';
 import { ApiTags, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
-import { Review } from './entities/review.entity';
+import { Review } from './schemas/review.schema';
 
 @ApiTags("Reviews")
 @Controller()
@@ -17,9 +16,8 @@ export class ReviewsController {
   @ApiResponse({ status: 201, description: "L'appréciation a été créée avec succès.", type: Review })
   @ApiResponse({ status: 400, description: 'Erreur de validation des données (Problem Details).' })
   @ApiResponse({ status: 404, description: 'Endroit introuvable (Problem Details).' })
-  async create(@Param('placeId') placeId: string, @Body() createReviewDto: CreateReviewDto, @Res({passthrough: true}) res: Response) {
+  async create(@Param('placeId') placeId: string, @Body() createReviewDto: CreateReviewDto) {
     const newReview = await this.reviewService.create(placeId, createReviewDto);
-    res.setHeader('Location', `api/v1/reviews/${newReview.id}`)
     return newReview;
   }
 
