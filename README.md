@@ -43,6 +43,7 @@ Avant de lancer l'application, il est obligatoire de configurer l'environnement 
 2. Modifiez le fichier `.env` pour définir vos variables :
    - `PORT` : Le port d'écoute du serveur (ex: `3000`).
    - `MONGO_URI` : Le lien d'accès a la base de donnée Mongo.
+   - `EMP_HTTPS_INFO` : dossier d'emplacement du certificat et de la clé pour HTTPS
 
 ### Installation
 Clonez le dépôt sur votre machine locale, puis installez les dépendances :
@@ -69,7 +70,8 @@ Pour lancer l'API en mode développement (avec rechargement à chaud) :
 ```bash
 npm run start:dev
 ```
-L'API sera accessible à l'adresse : `http://localhost:3000/api/v1`
+L'API sera accessible à l'adresse : `https://localhost:3001/api/v1`
+> Note: une demande HTTP redirige automatiquement vers le lien HTTPS
 
 ### Lint (Vérification du code)
 Pour analyser le code et s'assurer qu'il respecte les standards ESLint du projet :
@@ -89,7 +91,7 @@ Les fichiers compilés seront générés dans le dossier `/dist`.
 ## 📖 Swagger UI
 L'API intègre une documentation interactive complète et auto-générée via OpenAPI. 
 Une fois le serveur démarré, naviguez vers :
-👉 `http://localhost:3000/docs`
+👉 `https://localhost:3001/docs`
 
 Cette interface permet de visualiser le schéma exact des requêtes/réponses, les contraintes de validation, et d'exécuter des requêtes de test directement depuis le navigateur.
 
@@ -118,3 +120,14 @@ Une collection complète de scénarios (`CampusRate API.postman_collection.json`
 ## ⚠️ Limites connues
 Le projet présente actuellement la limite suivante :
 1. **Absence d'authentification :** L'API est actuellement entièrement publique. Aucun système de jetons JWT ou de limitation de requêtes (Rate Limiting) n'est implémenté pour le moment.
+
+## ✏️ Option réaliser dans le projet
+### HTTPS / TLS
+- **8.3 - T1: explication du rôle de HTTPS** - Le protocole **HTTPS** chiffre les communications entre le **client** (ex: navigateur, Postman) et notre **API**. Sans ce chiffrement (HTTP simple), **toutes** les données transiteraient en **"texte clair"**, permettant à **quiconque** interceptant le réseau de lire ou de modifier les requêtes (attaque `Man-in-the-Middle`). **HTTPS** garantit ainsi la confidentialité et l'intégrité des données échangées.
+- **8.3 - T2:** CampusRate est fonctionnel localement avec HTTPS.
+- **8.3 - T3:** Le certificat et la clé ont été générés dans un dossier `secrets`, qui a été placé dans le `.gitignore` pour ne pas divulguer les informations sensibles. Le certificat et la clé ont été générés avec la commande suivante :
+```bash
+   openssl req -x509 -newkey rsa:4096 -keyout secrets/key.pem -out secrets/cert.pem -days 90 -nodes -subj "//CN=localhost"
+```
+- 8.3 - T4: Redirection automatique HTTP vers HTTPS fonctionnelle.
+
