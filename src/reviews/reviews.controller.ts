@@ -4,7 +4,7 @@ import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
 import type { Response } from 'express';
 import { ApiTags, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
-import { Review } from './entities/review.entity';
+import { Review } from './schemas/review.schema';
 
 @ApiTags("Reviews")
 @Controller()
