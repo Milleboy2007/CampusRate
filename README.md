@@ -28,6 +28,9 @@ CampusRate est une API RESTful conçue pour permettre aux étudiants d'un campus
 - [Node.js](https://nodejs.org/) (version 18 ou supérieure)
 - npm (inclus avec Node.js)
 
+### Optionnel : Configurer une base de données MongoDB locale (Docker)
+Une configuration complète prête à l'emploi est disponible dans le dossier `config_db`. Pour l'utiliser, veuillez consulter les [instructions de configuration de la db avec Docker](config_db/README.md).
+
 ### Configuration de l'environnement
 Avant de lancer l'application, il est obligatoire de configurer l'environnement local. Un fichier `.env.example` est fourni à la racine du projet.
 1. Créez une copie de ce fichier et nommez-la `.env` :
