@@ -65,15 +65,21 @@ export class PlacesService {
   }
 
   async update(id: string, updatePlaceDto: UpdatePlaceDto):Promise<Place> {
-    const updatedPlace = await this.placeModel.findOneAndUpdate(
-      { id: id},
-      { $set: updatePlaceDto},
-      { returnDocument: 'after'}
-    ).exec();
+    try{
+      const updatedPlace = await this.placeModel.findOneAndUpdate(
+        { id: id},
+        { $set: updatePlaceDto},
+        { returnDocument: 'after'}
+      ).exec();
 
-    if (!updatedPlace) throw new NotFoundException(`No place found, is the id good? Id given: ${id}`);
+      if (!updatedPlace) throw new NotFoundException(`No place found, is the id good? Id given: ${id}`);
 
-    return updatedPlace;
+      return updatedPlace;
+
+    }catch(error){
+      if((error as any).code === 11000) throw new ConflictException('A place with this exact same name already existe!');
+      throw error;
+    }
   }
 
   async remove(id: string) {
