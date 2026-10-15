@@ -26,7 +26,12 @@ async function bootstrap() {
 
   app.use(helmet());
 
-  app.use(mongoSanitize())
+  app.use((req: any, res: any, next: any) => {
+    if (req.body) mongoSanitize.sanitize(req.body);
+    if (req.query) mongoSanitize.sanitize(req.query);
+    if (req.params) mongoSanitize.sanitize(req.params);
+    next();
+  });
 
   app.enableCors({
     origin: ['http://localhost:8080'],
