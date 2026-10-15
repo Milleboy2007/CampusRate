@@ -19,7 +19,7 @@ export class ReviewsController {
   @ApiResponse({ status: 404, description: 'Endroit introuvable (Problem Details).' })
   async create(@Param('placeId') placeId: string, @Body() createReviewDto: CreateReviewDto, @Res({passthrough: true}) res: Response) {
     const newReview = await this.reviewService.create(placeId, createReviewDto);
-    res.setHeader('Location', `api/v1/reviews/${newReview.id}`)
+    //res.setHeader('Location', `api/v1/reviews/${newReview.id}`)
     return newReview;
   }
 
